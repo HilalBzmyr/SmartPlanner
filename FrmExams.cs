@@ -6,22 +6,22 @@ using System.Windows.Forms;
 
 namespace smartPlanner
 {
-    public partial class FrmAssignments : Form
+    public partial class FrmExams : Form
     {
         private string connStr = ConfigurationManager
             .ConnectionStrings["connStr"].ConnectionString;
 
-        private int selectedAssignmentId = -1;
+        private int selectedExamId = -1;
 
-        public FrmAssignments()
+        public FrmExams()
         {
             InitializeComponent();
         }
 
-        private void FrmAssignments_Load(object sender, EventArgs e)
+        private void FrmExams_Load(object sender, EventArgs e)
         {
             LoadCoursesToCombo();
-            LoadAssignments();
+            LoadExams();
             ClearInputs();
         }
 
@@ -40,44 +40,45 @@ namespace smartPlanner
             }
         }
 
-        private void LoadAssignments()
+        private void LoadExams()
         {
             using (SqlConnection con = new SqlConnection(connStr))
             {
                 string q =
-                    "SELECT a.AssignmentID, a.CourseID, c.CourseName, a.Title, a.Description, a.DueDate " +
-                    "FROM Assignments a " +
-                    "INNER JOIN Courses c ON c.CourseID = a.CourseID " +
-                    "ORDER BY a.DueDate";
+                    "SELECT e.ExamID, e.CourseID, c.CourseName, e.ExamType, e.ExamDateTime, e.Description " +
+                    "FROM Exams e " +
+                    "INNER JOIN Courses c ON c.CourseID = e.CourseID " +
+                    "ORDER BY e.ExamDateTime";
 
                 SqlDataAdapter da = new SqlDataAdapter(q, con);
                 DataTable dt = new DataTable();
                 da.Fill(dt);
 
-                dgvAssignments.DataSource = dt;
+                dgvExams.DataSource = dt;
             }
 
-            if (dgvAssignments.Columns.Count > 0)
+            if (dgvExams.Columns.Count > 0)
             {
-                dgvAssignments.Columns["AssignmentID"].HeaderText = "ID";
-                dgvAssignments.Columns["CourseName"].HeaderText = "Course";
-                dgvAssignments.Columns["DueDate"].HeaderText = "Due Date";
-                dgvAssignments.Columns["CourseID"].Visible = false;
+                dgvExams.Columns["ExamID"].HeaderText = "ID";
+                dgvExams.Columns["CourseName"].HeaderText = "Course";
+                dgvExams.Columns["ExamType"].HeaderText = "Exam Type";
+                dgvExams.Columns["ExamDateTime"].HeaderText = "Date/Time";
+                dgvExams.Columns["CourseID"].Visible = false;
             }
         }
 
         private void ClearInputs()
         {
-            selectedAssignmentId = -1;
-            txtTitle.Clear();
+            selectedExamId = -1;
+            txtExamType.Clear();
             txtDescription.Clear();
-            dtpDueDate.Value = DateTime.Now.AddDays(1);
+            dtpExamDateTime.Value = DateTime.Now.AddDays(1);
 
             if (cmbCourses.Items.Count > 0)
                 cmbCourses.SelectedIndex = 0;
         }
 
-        private void AddAssignment()
+        private void AddExam()
         {
             if (cmbCourses.SelectedValue == null)
             {
@@ -85,38 +86,38 @@ namespace smartPlanner
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(txtTitle.Text))
+            if (string.IsNullOrWhiteSpace(txtExamType.Text))
             {
-                MessageBox.Show("Title cannot be empty.");
+                MessageBox.Show("Exam Type cannot be empty.");
                 return;
             }
 
             using (SqlConnection con = new SqlConnection(connStr))
             {
                 string q =
-                    "INSERT INTO Assignments (CourseID, Title, Description, DueDate) " +
-                    "VALUES (@cid, @title, @desc, @due)";
+                    "INSERT INTO Exams (CourseID, ExamType, ExamDateTime, Description) " +
+                    "VALUES (@cid, @type, @dt, @desc)";
 
                 SqlCommand cmd = new SqlCommand(q, con);
                 cmd.Parameters.AddWithValue("@cid", (int)cmbCourses.SelectedValue);
-                cmd.Parameters.AddWithValue("@title", txtTitle.Text.Trim());
+                cmd.Parameters.AddWithValue("@type", txtExamType.Text.Trim());
+                cmd.Parameters.AddWithValue("@dt", dtpExamDateTime.Value);
                 cmd.Parameters.AddWithValue("@desc",
                     string.IsNullOrWhiteSpace(txtDescription.Text) ? (object)DBNull.Value : txtDescription.Text.Trim());
-                cmd.Parameters.AddWithValue("@due", dtpDueDate.Value);
 
                 con.Open();
                 cmd.ExecuteNonQuery();
             }
 
-            LoadAssignments();
+            LoadExams();
             ClearInputs();
         }
 
-        private void UpdateAssignment()
+        private void UpdateExam()
         {
-            if (selectedAssignmentId == -1)
+            if (selectedExamId == -1)
             {
-                MessageBox.Show("Select an assignment from the list first.");
+                MessageBox.Show("Select an exam from the list first.");
                 return;
             }
 
@@ -126,44 +127,44 @@ namespace smartPlanner
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(txtTitle.Text))
+            if (string.IsNullOrWhiteSpace(txtExamType.Text))
             {
-                MessageBox.Show("Title cannot be empty.");
+                MessageBox.Show("Exam Type cannot be empty.");
                 return;
             }
 
             using (SqlConnection con = new SqlConnection(connStr))
             {
                 string q =
-                    "UPDATE Assignments " +
-                    "SET CourseID=@cid, Title=@title, Description=@desc, DueDate=@due " +
-                    "WHERE AssignmentID=@id";
+                    "UPDATE Exams " +
+                    "SET CourseID=@cid, ExamType=@type, ExamDateTime=@dt, Description=@desc " +
+                    "WHERE ExamID=@id";
 
                 SqlCommand cmd = new SqlCommand(q, con);
                 cmd.Parameters.AddWithValue("@cid", (int)cmbCourses.SelectedValue);
-                cmd.Parameters.AddWithValue("@title", txtTitle.Text.Trim());
+                cmd.Parameters.AddWithValue("@type", txtExamType.Text.Trim());
+                cmd.Parameters.AddWithValue("@dt", dtpExamDateTime.Value);
                 cmd.Parameters.AddWithValue("@desc",
                     string.IsNullOrWhiteSpace(txtDescription.Text) ? (object)DBNull.Value : txtDescription.Text.Trim());
-                cmd.Parameters.AddWithValue("@due", dtpDueDate.Value);
-                cmd.Parameters.AddWithValue("@id", selectedAssignmentId);
+                cmd.Parameters.AddWithValue("@id", selectedExamId);
 
                 con.Open();
                 cmd.ExecuteNonQuery();
             }
 
-            LoadAssignments();
+            LoadExams();
             ClearInputs();
         }
 
-        private void DeleteAssignment()
+        private void DeleteExam()
         {
-            if (selectedAssignmentId == -1)
+            if (selectedExamId == -1)
             {
-                MessageBox.Show("Select an assignment from the list first.");
+                MessageBox.Show("Select an exam from the list first.");
                 return;
             }
 
-            var result = MessageBox.Show("Delete selected assignment?", "Confirm",
+            var result = MessageBox.Show("Delete selected exam?", "Confirm",
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
             if (result != DialogResult.Yes)
@@ -171,31 +172,31 @@ namespace smartPlanner
 
             using (SqlConnection con = new SqlConnection(connStr))
             {
-                string q = "DELETE FROM Assignments WHERE AssignmentID=@id";
+                string q = "DELETE FROM Exams WHERE ExamID=@id";
                 SqlCommand cmd = new SqlCommand(q, con);
-                cmd.Parameters.AddWithValue("@id", selectedAssignmentId);
+                cmd.Parameters.AddWithValue("@id", selectedExamId);
 
                 con.Open();
                 cmd.ExecuteNonQuery();
             }
 
-            LoadAssignments();
+            LoadExams();
             ClearInputs();
         }
 
         private void btnAdd_Click(object sender, EventArgs e)
         {
-            AddAssignment();
+            AddExam();
         }
 
         private void btnUpdate_Click(object sender, EventArgs e)
         {
-            UpdateAssignment();
+            UpdateExam();
         }
 
         private void btnDelete_Click(object sender, EventArgs e)
         {
-            DeleteAssignment();
+            DeleteExam();
         }
 
         private void btnClear_Click(object sender, EventArgs e)
@@ -203,36 +204,25 @@ namespace smartPlanner
             ClearInputs();
         }
 
-        private void dgvAssignments_CellClick(object sender, DataGridViewCellEventArgs e)
+        private void dgvExams_SelectionChanged(object sender, EventArgs e)
         {
-           
-        }
+            if (dgvExams.CurrentRow == null) return;
+            if (dgvExams.CurrentRow.IsNewRow) return;
 
-        private void dgvAssignments_CellClick_1(object sender, DataGridViewCellEventArgs e)
-        {
+            var row = dgvExams.CurrentRow;
 
-        }
+            if (row.Cells["ExamID"].Value == null || row.Cells["ExamID"].Value == DBNull.Value) return;
 
-        private void dgvAssignments_SelectionChanged(object sender, EventArgs e)
-        {
-            if (dgvAssignments.CurrentRow == null) return;
-            if (dgvAssignments.CurrentRow.IsNewRow) return;
-
-            var row = dgvAssignments.CurrentRow;
-
-            if (row.Cells["AssignmentID"].Value == null || row.Cells["AssignmentID"].Value == DBNull.Value) return;
-
-            selectedAssignmentId = Convert.ToInt32(row.Cells["AssignmentID"].Value);
+            selectedExamId = Convert.ToInt32(row.Cells["ExamID"].Value);
 
             if (row.Cells["CourseID"].Value != null && row.Cells["CourseID"].Value != DBNull.Value)
                 cmbCourses.SelectedValue = Convert.ToInt32(row.Cells["CourseID"].Value);
 
-            txtTitle.Text = row.Cells["Title"].Value?.ToString() ?? "";
+            txtExamType.Text = row.Cells["ExamType"].Value?.ToString() ?? "";
             txtDescription.Text = row.Cells["Description"].Value == DBNull.Value ? "" : row.Cells["Description"].Value?.ToString();
 
-            if (row.Cells["DueDate"].Value != null && row.Cells["DueDate"].Value != DBNull.Value)
-                dtpDueDate.Value = Convert.ToDateTime(row.Cells["DueDate"].Value);
-
+            if (row.Cells["ExamDateTime"].Value != null && row.Cells["ExamDateTime"].Value != DBNull.Value)
+                dtpExamDateTime.Value = Convert.ToDateTime(row.Cells["ExamDateTime"].Value);
         }
     }
 }

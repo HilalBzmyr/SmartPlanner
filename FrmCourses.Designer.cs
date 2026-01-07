@@ -42,7 +42,7 @@
             // 
             // btnAddCourse
             // 
-            btnAddCourse.Location = new Point(383, 85);
+            btnAddCourse.Location = new Point(428, 60);
             btnAddCourse.Name = "btnAddCourse";
             btnAddCourse.Size = new Size(94, 29);
             btnAddCourse.TabIndex = 0;
@@ -52,7 +52,7 @@
             // 
             // btnUpdateCourse
             // 
-            btnUpdateCourse.Location = new Point(523, 140);
+            btnUpdateCourse.Location = new Point(570, 60);
             btnUpdateCourse.Name = "btnUpdateCourse";
             btnUpdateCourse.Size = new Size(94, 29);
             btnUpdateCourse.TabIndex = 1;
@@ -62,7 +62,7 @@
             // 
             // btnDeleteCourse
             // 
-            btnDeleteCourse.Location = new Point(650, 89);
+            btnDeleteCourse.Location = new Point(428, 130);
             btnDeleteCourse.Name = "btnDeleteCourse";
             btnDeleteCourse.Size = new Size(94, 29);
             btnDeleteCourse.TabIndex = 2;
@@ -72,7 +72,7 @@
             // 
             // btnClear
             // 
-            btnClear.Location = new Point(523, 91);
+            btnClear.Location = new Point(570, 130);
             btnClear.Name = "btnClear";
             btnClear.Size = new Size(94, 29);
             btnClear.TabIndex = 3;
@@ -117,6 +117,7 @@
             // 
             // dgvCourses
             // 
+            dgvCourses.BackgroundColor = Color.LightCoral;
             dgvCourses.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvCourses.Dock = DockStyle.Bottom;
             dgvCourses.Location = new Point(0, 233);
@@ -124,12 +125,13 @@
             dgvCourses.RowHeadersWidth = 51;
             dgvCourses.Size = new Size(800, 217);
             dgvCourses.TabIndex = 8;
-            dgvCourses.CellContentClick += dgvCourses_CellContentClick;
+            dgvCourses.CellClick += dgvCourses_CellClick;
             // 
             // FrmCourses
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.MistyRose;
             ClientSize = new Size(800, 450);
             Controls.Add(dgvCourses);
             Controls.Add(txtInstructorName);

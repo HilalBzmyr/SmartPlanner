@@ -20,7 +20,7 @@ namespace smartPlanner
         private string connStr = ConfigurationManager
             .ConnectionStrings["connStr"].ConnectionString;
 
-        // Seçili CourseID'yi tutmak için
+
         private int selectedCourseId = -1;
 
         public FrmCourses()
@@ -33,7 +33,7 @@ namespace smartPlanner
             LoadCourses();
         }
 
-        // Courses tablosunu DataGridView'e yükleyen metod
+
         private void LoadCourses()
         {
             using (SqlConnection con = new SqlConnection(connStr))
@@ -47,7 +47,6 @@ namespace smartPlanner
                 dgvCourses.DataSource = dt;
             }
 
-            // Sütun başlıkları daha okunaklı olsun
             if (dgvCourses.Columns.Count > 0)
             {
                 dgvCourses.Columns["CourseID"].HeaderText = "ID";
@@ -187,16 +186,26 @@ namespace smartPlanner
 
         }
 
-        private void dgvCourses_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex < 0) return; // header'a tıklanmışsa
 
-            DataGridViewRow row = dgvCourses.Rows[e.RowIndex];
+
+        private void dgvCourses_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+
+            var row = dgvCourses.Rows[e.RowIndex];
+
+            // NEW ROW / NULL protection
+            if (row.IsNewRow) return;
+            if (row.Cells["CourseID"].Value == null || row.Cells["CourseID"].Value == DBNull.Value)
+                return;
 
             selectedCourseId = Convert.ToInt32(row.Cells["CourseID"].Value);
-            txtCourseName.Text = row.Cells["CourseName"].Value.ToString();
-            txtInstructorName.Text = row.Cells["InstructorName"].Value.ToString();
 
+            txtCourseName.Text = row.Cells["CourseName"].Value?.ToString() ?? "";
+
+            txtInstructorName.Text = row.Cells["InstructorName"].Value == DBNull.Value
+                ? ""
+                : row.Cells["InstructorName"].Value?.ToString() ?? "";
         }
     }
 }
